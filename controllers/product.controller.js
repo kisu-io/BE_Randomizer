@@ -1,4 +1,5 @@
 const sendResponse = require("../helpers/sendResponse");
+const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
 const productController = {};
@@ -43,7 +44,6 @@ productController.createProduct = async (req, res, next) => {
 
   return sendResponse(res, 200, true, result, false, "success");
 };
-
 productController.getAllProduct = async (req, res, next) => {
   let { limit, page, ...filter } = req.query;
   limit = parseInt(req.query.limit) || 5;
@@ -69,7 +69,6 @@ productController.getAllProduct = async (req, res, next) => {
     "Successfully get all product"
   );
 };
-
 productController.updateProduct = async (req, res, next) => {
   let result;
   const allowOptions = ["name", "stock", "price"];
@@ -140,4 +139,47 @@ productController.getSingleProduct = async (req, res, next) => {
     "Successfully get single product"
   );
 };
+
+productController.rateProduct = async (req, res, next) => {
+  let result;
+  try {
+    const author = req.currentUser._id;
+    let { rate } = req.body;
+    const { productId } = req.params;
+    const found = await Product.findById(productId);
+    if (!found) throw new Error("Product not found");
+    ///check if current user has bought this item
+    const isPaid = await Cart.findOne({
+      owner: author,
+      status: "paid",
+      "products.productId": productId,
+    });
+    console.log("test", isPaid);
+    if (!isPaid) throw new Error("buy first rate later");
+    rate = parseInt(rate);
+    if (!rate || typeof rate !== "number" || rate < 1) {
+      throw new Error("Invalid rate");
+    }
+    const newRating = {
+      author,
+      rate,
+    };
+    found.ratings.push(newRating);
+
+    let newAverage = found.ratings.reduce((acc, cur) => acc + cur.rate, 0);
+    newAverage /= found.ratings.length;
+
+    result = await Product.findByIdAndUpdate(
+      productId,
+      { ratings: found.ratings, averageRate: newAverage },
+      {
+        new: true,
+      }
+    );
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(res, 200, true, result, false, "Success rate a product");
+};
+
 module.exports = productController;
