@@ -14,4 +14,7 @@ router.use("/products", productRoutes);
 const cartRoutes = require("./cart.api");
 router.use("/carts", cartRoutes);
 
+const commentRoutes = require("./comment.api");
+router.use("/comments", commentRoutes);
+
 module.exports = router;
