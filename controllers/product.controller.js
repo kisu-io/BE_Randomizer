@@ -1,5 +1,6 @@
 const sendResponse = require("../helpers/sendResponse");
 const Cart = require("../models/Cart");
+const Comment = require("../models/Comment");
 const Product = require("../models/Product");
 
 const productController = {};
@@ -121,12 +122,16 @@ productController.deleteProduct = async (req, res, next) => {
   );
 };
 productController.getSingleProduct = async (req, res, next) => {
-  let result;
-
+  let result = {};
+  let comments;
   const { productId } = req.params;
   try {
     if (!productId) throw new Error("product not found, or deleted");
     result = await Product.findById(productId);
+    comments = await Comment.find({ targetProduct: productId }).populate(
+      "author",
+      "name"
+    );
   } catch (error) {
     return next(error);
   }
@@ -134,7 +139,7 @@ productController.getSingleProduct = async (req, res, next) => {
     res,
     200,
     true,
-    result,
+    { result, comments },
     false,
     "Successfully get single product"
   );
