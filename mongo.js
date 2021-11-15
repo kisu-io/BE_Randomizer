@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const fakeProduct = require("./createProduct");
 mongoose.Promise = global.Promise;
 
 // Connect MongoDB at default port 27017.
@@ -12,6 +12,7 @@ mongoose.connect(
   (err) => {
     if (!err) {
       console.log("MongoDB Connection Succeeded.");
+      // fakeProduct(); comment out to no longer run
     } else {
       console.log("Error in DB connection: " + err);
     }
