@@ -11,7 +11,7 @@ const {
   loginWithEmailPassword,
   importantController,
 } = require("../controllers/user.controller");
-const multerConfig = require("../helpers/multerConfig");
+const imageUploadMiddleware = require("../middlewares/imageUpload.middleware");
 /**
  * Description:  get all edas
  * Access : admin role required
@@ -36,7 +36,7 @@ router.post("/login", loginWithEmailPassword);
 router.put(
   "/update-me",
   authenticationMiddleware,
-  multerConfig.single("image"),
+  imageUploadMiddleware.single("avatar"),
   updateById
 );
 /**

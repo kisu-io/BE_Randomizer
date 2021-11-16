@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
 const { uploader } = require("../helpers/uploadHelper");
-
 const userController = {};
 const SALT_ROUND = parseInt(process.env.SALT_ROUND);
 
@@ -46,14 +45,7 @@ userController.createByEmailPassword = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-  return sendResponse(
-    res,
-    200,
-    true,
-    result,
-    false,
-    "Successfully create user"
-  );
+  return sendResponse(res, 200, true, result, false, "Successfully create user");
 };
 userController.loginWithEmailPassword = async (req, res, next) => {
   const { email, password } = req.body;
@@ -77,6 +69,7 @@ userController.updateById = async (req, res, next) => {
   let result;
   const allowOptions = ["name", "email"];
   const updateObject = {};
+  const imagePath = req.file.path;
   let imageResult;
   const filePath = req.file.path;
   try {
@@ -85,6 +78,11 @@ userController.updateById = async (req, res, next) => {
         updateObject[option] = req.body[option];
       }
     });
+    if (imagePath) {
+      const cloudinaryResponse = await uploader.upload(imagePath);
+      updateObject.avatar = cloudinaryResponse.secure_url;
+    }
+
     if (filePath) {
       imageResult = await uploader.upload(filePath);
       updateObject.avatar = imageResult.secure_url;
@@ -95,14 +93,7 @@ userController.updateById = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-  return sendResponse(
-    res,
-    200,
-    true,
-    result,
-    false,
-    "Successfully update user"
-  );
+  return sendResponse(res, 200, true, result, false, "Successfully update user");
 };
 userController.deleteById = async (req, res, next) => {
   //soft delete
