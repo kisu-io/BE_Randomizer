@@ -31,47 +31,47 @@ const createCart = async () => {
     //find existed cart
     let found;
     if (!found) {
-      found = await Cart.create(singleCart).populate("products.productId");
+      found = await Cart.create(singleCart);
+      found = await found.populate("products.productId");
     }
     console.log("created this cart", found);
-
+    console.log("=====================");
     // Payment
     //geting THIS ITERATION's user information
+
     const { currentBalance, _id } = user;
     // this cart id
     const cartId = found._id;
     // contruct a list of product qty to update
-    try {
-      const productsToUpdate = await Promise.all(
-        found.products.map(async (request) => {
-          //check the requesting id availability with existing stock
-          const existed = await Product.findById(request.productId._id);
-          //set initial stock = existed stock
-          let newStock = existed.stock;
-          if (request.qty <= existed.stock) {
-            //reassign newstock with value of existed - request
-            newStock = existed.stock - request.qty;
-          } else {
-            console.log(
-              "Sold out Cant not change",
-              request.productId.name,
-              request.qty,
-              existed.stock
-            );
-          }
-          return { _id: existed._id, newStock };
-        })
-      );
-    } catch (error) {
-      return console.log(error);
-    }
+
+    const productsToUpdate = await Promise.all(
+      found.products.map(async (request) => {
+        //check the requesting id availability with existing stock
+        const existed = await Product.findById(request.productId._id);
+        //set initial stock = existed stock
+        let newStock = existed.stock;
+        if (request.qty <= existed.stock) {
+          //reassign newstock with value of existed - request
+          newStock = existed.stock - request.qty;
+        } else {
+          console.log(
+            "Sold out Cant not change",
+            request.productId.name,
+            request.qty,
+            existed.stock
+          );
+        }
+        return { _id: existed._id, newStock };
+      })
+    );
+
     // Balance Check
     const total = found.products.reduce(
       (acc, cur) => acc + cur.qty * cur.productId.price,
       0
     );
 
-    const newBalance = currentBalance;
+    let newBalance = currentBalance;
     if (total <= currentBalance) {
       //if total < currentBalance , chagne the cart status to paid, and update User fund, update stock
       newBalance = currentBalance - total;
@@ -91,6 +91,11 @@ const createCart = async () => {
           });
         })
       );
+      console.log("PAID", cartId);
+      console.log("===============");
+    } else {
+      console.log("no money");
+      console.log("===============");
     }
   });
 };

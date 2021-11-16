@@ -13,7 +13,7 @@ const createUser = async (req, res, next) => {
       name: faker.name.firstName(),
       email: faker.internet.email(),
       password: "123",
-      currentBalance: faker.datatype.number({ min: 100000, max: 1000000 }),
+      currentBalance: faker.datatype.number({ min: 10, max: 10000 }),
       avatar: faker.image.avatar(),
     };
     // console.log(singleUser.password);
@@ -22,9 +22,9 @@ const createUser = async (req, res, next) => {
     singleUser.password = await bcrypt.hash(singleUser.password, salt);
     if (!found) {
       const created = await User.create(singleUser);
-      //   console.log(
-      //     `Created ${created.name} email ${created.email} password ${created.password} currentBalance ${created.currentBalance} avatar ${created.avatar}`
-      //   );
+      console.log(
+        `Created ${created.name} email ${created.email} password ${created.password} currentBalance ${created.currentBalance} avatar ${created.avatar}`
+      );
     } else {
       console.log("Found same user name", found.name);
     }
