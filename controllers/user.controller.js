@@ -87,7 +87,7 @@ userController.updateById = async (req, res, next) => {
     });
     if (filePath) {
       imageResult = await uploader.upload(filePath);
-      update.avatar = imageResult.secure_url;
+      updateObject.avatar = imageResult.secure_url;
     }
     result = await User.findByIdAndUpdate(req.currentUser._id, updateObject, {
       new: true,
