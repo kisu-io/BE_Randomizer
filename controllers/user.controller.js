@@ -2,6 +2,7 @@ const sendResponse = require("../helpers/sendResponse");
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
+const { uploader } = require("../helpers/uploadHelper");
 
 const userController = {};
 const SALT_ROUND = parseInt(process.env.SALT_ROUND);
@@ -76,13 +77,18 @@ userController.updateById = async (req, res, next) => {
   let result;
   const allowOptions = ["name", "email"];
   const updateObject = {};
-
+  let imageResult;
+  const filePath = req.file.path;
   try {
     allowOptions.forEach((option) => {
       if (req.body[option] !== undefined) {
         updateObject[option] = req.body[option];
       }
     });
+    if (filePath) {
+      imageResult = await uploader.upload(filePath);
+      update.avatar = imageResult.secure_url;
+    }
     result = await User.findByIdAndUpdate(req.currentUser._id, updateObject, {
       new: true,
     });

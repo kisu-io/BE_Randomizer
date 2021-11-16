@@ -10,6 +10,7 @@ const userSchema = Schema(
     isDeleted: { type: Boolean, default: false },
     role: { type: String, enum: ["admin", "guest"], default: "guest" },
     currentBalance: { type: Number, default: 0 },
+    avatar: String,
   },
   {
     timestamps: true,

@@ -11,6 +11,7 @@ const {
   loginWithEmailPassword,
   importantController,
 } = require("../controllers/user.controller");
+const multerConfig = require("../helpers/multerConfig");
 /**
  * Description:  get all edas
  * Access : admin role required
@@ -21,6 +22,7 @@ router.get("/", getAll);
  * Access : public
  */
 router.post("/", createByEmailPassword);
+
 /**
  * Description:  destroy the world
  * Access : admin role required
@@ -31,7 +33,12 @@ router.post("/login", loginWithEmailPassword);
  * Description:  destroy the world
  * Access : authenticated user
  */
-router.put("/update-me", authenticationMiddleware, updateById);
+router.put(
+  "/update-me",
+  authenticationMiddleware,
+  multerConfig.single("image"),
+  updateById
+);
 /**
  * Description:  destroy the world
  * Access : authenticated user
