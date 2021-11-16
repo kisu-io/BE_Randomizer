@@ -15,7 +15,7 @@ mongoose.connect(
       console.log("MongoDB Connection Succeeded.");
       // fakeProduct(); // comment out to no longer run
       // fakeUser();
-      fakeCart();
+      // fakeCart();
     } else {
       console.log("Error in DB connection: " + err);
     }
