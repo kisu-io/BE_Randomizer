@@ -106,4 +106,67 @@ userController.deleteById = async (req, res, next) => {
   }
   return sendResponse(res, 200, true, null, false, "Successfully delete user");
 };
+userController.createWithGoogle = async (req, res, next) => {
+  const userInfo = req.user;
+  let result;
+  // allow user to create account with google sign
+  // from userInfo input, create an account in the database with
+  try {
+    const found = await User.findOne({ email: userInfo.emails[0].value });
+    if (found) throw new Error("User already registered");
+    const salt = await bcrypt.genSalt(SALT_ROUND);
+    let password = await bcrypt.hash("abc", salt);
+
+    const newUser = {
+      name: userInfo.displayName,
+      avatar: userInfo.photos[0].value,
+      email: userInfo.emails[0].value,
+      password,
+    };
+    result = await User.create(newUser);
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create account with Google"
+  );
+};
+userController.createWithFacebook = async (req, res, next) => {
+  const userInfo = req.user;
+
+  let result;
+  // allow user to create account with google sign
+  // from userInfo input, create an account in the database with
+  try {
+    const found = await User.findOne({ email: userInfo.emails[0].value });
+    console.log("haha", found);
+    if (found) throw new Error("User already registered");
+    const salt = await bcrypt.genSalt(SALT_ROUND);
+    let password = await bcrypt.hash("abc", salt);
+
+    const newUser = {
+      name: userInfo.displayName,
+      email: userInfo.emails[0].value,
+      facebookId: userInfo.id,
+      password,
+    };
+    result = await User.create(newUser);
+    console.log(result);
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create account with Facebook"
+  );
+};
 module.exports = userController;

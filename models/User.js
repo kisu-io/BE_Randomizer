@@ -11,6 +11,7 @@ const userSchema = Schema(
     role: { type: String, enum: ["admin", "guest"], default: "guest" },
     currentBalance: { type: Number, default: 0 },
     avatar: String,
+    // facebookId: { type: String, default: "" },
   },
   {
     timestamps: true,
