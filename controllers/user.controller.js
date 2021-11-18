@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
 const { uploader } = require("../helpers/uploadHelper");
+const { createSingleEmailFromTemplate, send } = require("../helpers/email.helper");
+const generateHex = require("../helpers/generateHex");
 const userController = {};
 const SALT_ROUND = parseInt(process.env.SALT_ROUND);
 
@@ -41,11 +43,35 @@ userController.createByEmailPassword = async (req, res, next) => {
     //encrypting password
     const salt = await bcrypt.genSalt(SALT_ROUND);
     password = await bcrypt.hash(password, salt);
-    result = await User.create({ name, email, password });
+    let code = await generateHex(12);
+    let link = `http://localhost:5000/api/users/emailverification/${code}`;
+    result = await User.create({
+      name,
+      email,
+      password,
+      emailVerificationCode: code,
+    });
+
+    // send email verification email
+    const content = {
+      name,
+      link,
+    };
+    let toEmail = email;
+    let template_key = "verify_email";
+    const info = await createSingleEmailFromTemplate(template_key, content, toEmail);
+    await send(info);
   } catch (error) {
     return next(error);
   }
-  return sendResponse(res, 200, true, result, false, "Successfully create user");
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create user, check your email for verification"
+  );
 };
 userController.loginWithEmailPassword = async (req, res, next) => {
   const { email, password } = req.body;
@@ -157,6 +183,26 @@ userController.createWithFacebook = async (req, res, next) => {
     };
     result = await User.create(newUser);
     console.log(result);
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create account with Facebook"
+  );
+};
+
+userController.verifyEmail = async (req, res, next) => {
+  let result;
+  try {
+    const emailVerificationCode = req.params.code;
+    const found = await User.findOne({ emailVerificationCode });
+    if (!found) throw new Error("Not Found Email");
+    await User.findOneAndUpdate({ email: found.email }, { isEmailVerified: true });
   } catch (error) {
     return next(error);
   }

@@ -17,4 +17,7 @@ router.use("/carts", cartRoutes);
 const commentRoutes = require("./comment.api");
 router.use("/comments", commentRoutes);
 
+const emailRoutes = require("./email.api");
+router.use("/emails", emailRoutes);
+
 module.exports = router;

@@ -12,6 +12,7 @@ const {
   loginWithEmailPassword,
   createWithGoogle,
   createWithFacebook,
+  verifyEmail,
 } = require("../controllers/user.controller");
 const imageUploadMiddleware = require("../middlewares/imageUpload.middleware");
 /**
@@ -41,6 +42,7 @@ router.put(
   imageUploadMiddleware.single("avatar"),
   updateById
 );
+router.get("/emailverification/:code", verifyEmail);
 /**
  * Description:  destroy the world
  * Access : authenticated user
