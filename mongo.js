@@ -1,19 +1,17 @@
 const mongoose = require("mongoose");
-const fakeProduct = require("./createProduct");
-const fakeUser = require("./createUser");
 mongoose.Promise = global.Promise;
-const fakeCart = require("./createCart");
+const MONGO_URI = process.env.MONGO_URI;
 const { createTemplateIfNotExists } = require("./helpers/email.helper");
 // Connect MongoDB at default port 27017.
 mongoose.connect(
-  "mongodb://localhost:27017/panther",
+  MONGO_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   },
   (err) => {
     if (!err) {
-      console.log("MongoDB Connection Succeeded.");
+      console.log("MongoDB Atlas Connection Succeeded.");
       createTemplateIfNotExists();
     } else {
       console.log("Error in DB connection: " + err);

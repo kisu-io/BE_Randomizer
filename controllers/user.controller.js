@@ -195,7 +195,6 @@ userController.createWithFacebook = async (req, res, next) => {
     "Successfully create account with Facebook"
   );
 };
-
 userController.verifyEmail = async (req, res, next) => {
   let result;
   try {
@@ -213,6 +212,70 @@ userController.verifyEmail = async (req, res, next) => {
     result,
     false,
     "Successfully create account with Facebook"
+  );
+};
+userController.forgotPassword = async (req, res, next) => {
+  const { email, code } = req.body;
+  try {
+    if (!email) new Error("Not Found Email");
+    if (!code) new Error("Invalid code");
+    const found = await User.findOne({ email, resetPassword: code });
+    // const salt = await bcrypt.genSalt(SALT_ROUND);
+    // password = await bcrypt.hash(password, salt);
+    const password = "abc123";
+    const salt = await bcrypt.genSalt(SALT_ROUND);
+    const saltedPassword = await bcrypt.hash(password, salt);
+    await User.findOneAndUpdate(
+      { email: found.email },
+      { password: saltedPassword }
+    );
+
+    // Gửi mail mới thông báo reset password
+  } catch (error) {
+    return next(error);
+  }
+};
+
+userController.createResetPasswordEmail = async (req, res, next) => {
+  const { name, email } = req.params;
+  let result;
+  try {
+    if (!name || !email) throw new Error("missing input");
+    const found = await User.findOne({ email });
+    if (!found) throw new Error("User not found");
+    //encrypting password
+    // const salt = await bcrypt.genSalt(SALT_ROUND);
+    // password = await bcrypt.hash(password, salt);
+    let code = await generateHex(12);
+    // let link = `http://localhost:5000/api/users/emailverification/${code}`;
+    let link = `http://localhost:5000/api/users/resetPassword/${code}`;
+    result = await User.findOneAndUpdate(
+      {
+        name,
+        email,
+      },
+      { resetPassword: code }
+    );
+
+    // send email verification email
+    const content = {
+      name,
+      link,
+    };
+    let toEmail = email;
+    let template_key = "verify_email";
+    const info = await createSingleEmailFromTemplate(template_key, content, toEmail);
+    await send(info);
+  } catch (error) {
+    return next(error);
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    result,
+    false,
+    "Successfully create user, check your email for verification"
   );
 };
 module.exports = userController;

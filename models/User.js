@@ -13,6 +13,7 @@ const userSchema = Schema(
     avatar: String,
     emailVerificationCode: { type: String },
     isEmailVerified: { type: Boolean, default: false },
+    resetPassword: { data: String, default: "" },
   },
   {
     timestamps: true,

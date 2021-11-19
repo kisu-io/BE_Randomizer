@@ -13,6 +13,7 @@ const {
   createWithGoogle,
   createWithFacebook,
   verifyEmail,
+  forgotPassword,
 } = require("../controllers/user.controller");
 const imageUploadMiddleware = require("../middlewares/imageUpload.middleware");
 /**
@@ -43,6 +44,7 @@ router.put(
   updateById
 );
 router.get("/emailverification/:code", verifyEmail);
+router.put("/forgot-password", forgotPassword);
 /**
  * Description:  destroy the world
  * Access : authenticated user
@@ -58,12 +60,10 @@ router.get(
   passport.authenticate("google", { failureRedirect: "/notFound" }),
   createWithGoogle
 );
-
 router.get(
   "/login/facebook",
   passport.authenticate("facebook", { scope: ["email"] })
 );
-
 router.get(
   "/login/facebookok",
   passport.authenticate("facebook", {
